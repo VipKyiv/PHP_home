@@ -1,4 +1,5 @@
 /*
+ new strin for git test purpose
  Basic ESP8266 MQTT example
 
  This sketch demonstrates the capabilities of the pubsub library in combination
