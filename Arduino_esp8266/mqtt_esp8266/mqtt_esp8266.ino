@@ -79,6 +79,8 @@ void callback(char* topic, byte* payload, unsigned int length) {
     digitalWrite(BUILTIN_LED, LOW);   // Turn the LED on (Note that LOW is the voltage level
     // but actually the LED is on; this is because
     // it is active low on the ESP8266)
+    // push message back to broker
+    client.publish("/outTopic", "Successfully started");
   } else {
     digitalWrite(BUILTIN_LED, HIGH);  // Turn the LED off by making the voltage HIGH
   }
@@ -112,11 +114,11 @@ void reconnect() {
 
 void setup() {
   pinMode(BUILTIN_LED, OUTPUT);     // Initialize the BUILTIN_LED pin as an output
+  digitalWrite(BUILTIN_LED, HIGH);
   Serial.begin(115200);
   setup_wifi();
   client.setServer(mqtt_server, 1883);
   client.setCallback(callback);
-  digitalWrite(BUILTIN_LED, HIGH);
 }
 
 void loop() {
@@ -127,7 +129,7 @@ void loop() {
   client.loop();
 
   long now = millis();
-  if (now - lastMsg > 20000) {
+  if (now - lastMsg > 100000) {
     lastMsg = now;
     ++value;
     snprintf (msg, 50, "hello world #%ld", value);
