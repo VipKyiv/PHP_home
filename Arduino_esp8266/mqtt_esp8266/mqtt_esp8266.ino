@@ -102,6 +102,7 @@ void reconnect() {
       client.publish("/outTopic", "hello world");
       // ... and resubscribe
       client.subscribe("/valve/#");
+      client.subscribe("/debug");
     } else {
       Serial.print("failed, rc=");
       Serial.print(client.state());
