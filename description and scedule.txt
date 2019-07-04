@@ -1,6 +1,13 @@
 How OpenWrt interacts with MC(microcontollers), WEB, CLOUD, Mobile phones ... (using MQTT)
 
-Let say we have local watering system that we 
+Let say we have a local water system(LWS) that we use for watering process and main water system to fill a tank.
+The local water system will take water from the tank using its own pump.
+To fill the tank we will use a bobber inside the tank. When level of water is lower then we set MC will recieve a signal to open a valve
+for MWS. After the tank is filled out and bobber achieves top level we set MC will recieve a signal to close the valve for MWS.
+
+Main components of LWS are tank, pump, set of valves and sensors. Various devices for the watering can be connected to valves through pipes or hoses.
+Valves are handled by MC through relays. Sensors are connected to MC.
+
 
 CRON
    OUTPUT
@@ -14,11 +21,20 @@ plugin WATERING
 	      - change status after Begin/End command
 		  - information from sensors
    OUTPUT    
-     - to MC send Begin/End command (Start/Stop command should be analised and if nesessary transformed into Begin/End)
-	         analise information from some kind of sensors like rain starts, pump is on/of, bobber (to open/close valve from main water system)
+     - to MC send Begin/End command (Start/Stop command should be analised and if nesessary transformed into Begin/End),
+	         analise information from some kind of sensors like rain starts, pump is on/of, bobber (to open/close valve from main water system);
 	 - record to DB (directly or throughout separate driver)
-	      - change valve's status after recieving from MC
-		  - write information from sensors
+	      - change valve's status after recieving from MC;
+		  - write information from sensors;
+
+MC
+    INPUT
+	  - from WATERING Begin/End command;
+	OUTPUT
+	  - to WATERING:
+	      - change valve's status;
+		  - send information from sensors;
+
 
 WEB server
 	OUTPUT
@@ -35,3 +51,24 @@ EMERGENCY system
 	  - from sensors (throughout MC)
 	OUTPUT
 	  - to Pushover/email throughout Mqttwarn
+
+
+
+MC     microcontoller;
+NM     netowrk monitoring;
+LWS    local water system;
+MWS    main water system;
+
+--------------------------------------------------------------------------------------------------------------
+
+!!!!!    on work now
+
+plugin WATERING
+   INPUT
+     - from CRON Begin/End for valves
+	 - from WEB/CLOUD Start/Stop signal for valve/valves(ALLSTOP/ALLSTART)  	 
+
+
+   OUTPUT    
+     - to MC send Begin/End command (Start/Stop command should be analised and if nesessary transformed into Begin/End),
+	         analise information from some kind of sensors like rain starts, pump is on/of, bobber (to open/close valve from main water system);
