@@ -1,0 +1,37 @@
+How OpenWrt interacts with MC(microcontollers), WEB, CLOUD, Mobile phones ... (using MQTT)
+
+Let say we have local watering system that we 
+
+CRON
+   OUTPUT
+     - to WATERING send Begin/End for valves(by name ?)
+
+plugin WATERING
+   INPUT
+     - from CRON Begin/End for valves
+	 - from WEB/CLOUD Start/Stop signal for valve/valves(ALLSTOP/ALLSTART)  
+	 - from MC
+	      - change status after Begin/End command
+		  - information from sensors
+   OUTPUT    
+     - to MC send Begin/End command (Start/Stop command should be analised and if nesessary transformed into Begin/End)
+	         analise information from some kind of sensors like rain starts, pump is on/of, bobber (to open/close valve from main water system)
+	 - record to DB (directly or throughout separate driver)
+	      - change valve's status after recieving from MC
+		  - write information from sensors
+
+WEB server
+	OUTPUT
+	  - to WATERING send Start/Stop for valves(by name ?)
+
+CLOUD/MOBILE app
+	OUTPUT
+	  - to WATERING send Start/Stop for valves(by name ?)
+    
+		  
+EMERGENCY system
+    INPUT
+	  - from NM (netowrk monitoring)
+	  - from sensors (throughout MC)
+	OUTPUT
+	  - to Pushover/email throughout Mqttwarn
