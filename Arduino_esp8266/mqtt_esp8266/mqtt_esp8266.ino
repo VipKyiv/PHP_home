@@ -34,13 +34,15 @@ const char* password = "charade23450";
 const char* mqtt_server = "192.168.1.150";
 const char* mqtt_user = "test";
 const char* mqtt_pass = "duster07";
-const char* mqtt_client = "ESP8266";
+const char* mqtt_client = "ESP8266_1";
+const char* outTopic = "/watering/";
 
 WiFiClient espClient;
 PubSubClient client(espClient);
 long lastMsg = 0;
 char msg[50];
 int value = 0;
+byte isFirstTime = true;
 
 void setup_wifi() {
 
@@ -99,7 +101,13 @@ void reconnect() {
     if (client.connect(mqtt_client, mqtt_user, mqtt_pass)) {
       Serial.println("connected");
       // Once connected, publish an announcement...
-      client.publish("/outTopic", "hello world");
+      if (isFirstTime){
+        char topic[strlen(outTopic) + strlen(mqtt_client)];
+        strcpy(topic, outTopic);
+        strcat(topic, mqtt_client);
+        client.publish(topic, "switched_on");
+        isFirstTime = false;        
+      }
       // ... and resubscribe
       client.subscribe("/valve/#");
       client.subscribe("/debug");
