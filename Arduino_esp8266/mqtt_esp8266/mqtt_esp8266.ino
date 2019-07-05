@@ -107,6 +107,9 @@ void reconnect() {
         strcat(topic, mqtt_client);
         client.publish(topic, "switched_on");
         isFirstTime = false;        
+        Serial.print("First start MC ");
+        Serial.print(topic);
+        Serial.println(" switched_on");
       }
       // ... and resubscribe
       client.subscribe("/valve/#");
