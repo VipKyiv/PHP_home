@@ -77,13 +77,14 @@ void callback(char* topic, byte* payload, unsigned int length) {
 
 
   // Switch on the LED if an 1 was received as first character
-  if ( strPayload == "start" or strPayload == "Start") {
+  if ( strPayload == "Begin" or strPayload == "Start") {
     digitalWrite(BUILTIN_LED, LOW);   // Turn the LED on (Note that LOW is the voltage level
     // but actually the LED is on; this is because
     // it is active low on the ESP8266)
     // push message back to broker
     client.publish("/outTopic", "Successfully started");
-  } else {
+  } 
+  else if ( strPayload == "End" or strPayload == "Stop"){
     digitalWrite(BUILTIN_LED, HIGH);  // Turn the LED off by making the voltage HIGH
   }
 
@@ -136,15 +137,16 @@ void setup() {
 void loop() {
 
   if (!client.connected()) {
+    Serial.println("reconnect");
     reconnect();
   }
   client.loop();
 
   long now = millis();
-  if (now - lastMsg > 100000) {
+  if (now - lastMsg > 900000) {
     lastMsg = now;
     ++value;
-    snprintf (msg, 50, "hello world #%ld", value);
+    snprintf (msg, 50, "%s. I am still alive #%ld", mqtt_client, value);
     Serial.print("Publish message: ");
     Serial.println(msg);
     client.publish("/outTopic", msg);
