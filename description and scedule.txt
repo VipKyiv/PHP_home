@@ -22,7 +22,7 @@ plugin WATERING
 		  - information from sensors
    OUTPUT    
      - to MC send Begin/End command (Start/Stop command should be analised and if nesessary transformed into Begin/End),
-	         analise information from some kind of sensors like rain starts, pump is on/of, bobber (to open/close valve from main water system);
+	    ???  analise information from some kind of sensors like rain starts, pump is on/of, bobber (to open/close valve from main water system);
 	 - record to DB (directly or throughout separate driver)
 	      - change valve's status after recieving from MC;
 		  - write information from sensors;
@@ -67,8 +67,32 @@ plugin WATERING
    INPUT
      - from CRON Begin/End for valves
 	 - from WEB/CLOUD Start/Stop signal for valve/valves(ALLSTOP/ALLSTART)  	 
+	     if Begin:
+		     update status to <RUNNING>
+			 if ! is_stopped
+			    (OUTPUT)push "Begin" message to MC
+		 if End:
+             update status to <IDLE>		 
+             (OUTPUT)push "End" message to MC			 
+		 if Start:
+		     update is_stopped to N
+		     if status == <IDLE>
+			    (OUTPUT)push "Start" message to MC			    
+         if Stop:
+		     update is_stopped to Y 
+		     if status == <RUNNING>
+			    (OUTPUT)push "Stop" message to MC		
+         if StopAll:
+		     - update is_stopped to Y for all records
+			 - stop devices if nesessary
+         if StartAll:
+		     - update is_stopped to N for all records
+			 - start devices if nesessary
+		 
+         		 
+             		 
 
 
    OUTPUT    
      - to MC send Begin/End command (Start/Stop command should be analised and if nesessary transformed into Begin/End),
-	         analise information from some kind of sensors like rain starts, pump is on/of, bobber (to open/close valve from main water system);
+	   analise information from some kind of sensors like rain starts, pump is on/of, bobber (to open/close valve from main water system);
