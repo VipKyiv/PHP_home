@@ -77,14 +77,14 @@ void callback(char* topic, byte* payload, unsigned int length) {
 
   // Switch on the LED if an 1 was received as first character
   if ( strPayload == "Begin" or strPayload == "Start") {
-    digitalWrite(BUILTIN_LED, LOW);   // Turn the LED on (Note that LOW is the voltage level
+    digitalWrite(LED_BUILTIN, LOW);   // Turn the LED on (Note that LOW is the voltage level
     // but actually the LED is on; this is because
     // it is active low on the ESP8266)
     // push message back to broker
     client.publish("/outTopic", "Successfully started");
   } 
   else if ( strPayload == "End" or strPayload == "Stop"){
-    digitalWrite(BUILTIN_LED, HIGH);  // Turn the LED off by making the voltage HIGH
+    digitalWrite(LED_BUILTIN, HIGH);  // Turn the LED off by making the voltage HIGH
   }
 
 }
@@ -125,8 +125,8 @@ void reconnect() {
 }
 
 void setup() {
-  pinMode(BUILTIN_LED, OUTPUT);     // Initialize the BUILTIN_LED pin as an output
-  digitalWrite(BUILTIN_LED, HIGH);
+  pinMode(LED_BUILTIN, OUTPUT);     // Initialize the BUILTIN_LED pin as an output
+  digitalWrite(LED_BUILTIN, HIGH);
   Serial.begin(115200);
   setup_wifi();
   client.setServer(mqtt_server, 1883);
