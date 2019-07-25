@@ -26,6 +26,7 @@
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
 
+#define LED_BUILTIN D4
 // Update these with values suitable for your network.
 
 const char* ssid = "OpenWrt";
