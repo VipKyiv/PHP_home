@@ -1,4 +1,4 @@
-/*
+/* 
  new strin for git test purpose
  Basic ESP8266 MQTT example
 
@@ -36,6 +36,9 @@ const char* mqtt_user = "test";
 const char* mqtt_pass = "duster07";
 const char* mqtt_client = "ESP8266_1";
 const char* outTopic = "/watering/";
+String dev_name[] = {"valve_1","valve_2","valve_3"};
+//const char* dev_name[] = {"valve_1","valve_2","valve_3", "valve_4"};
+
 
 WiFiClient espClient;
 PubSubClient client(espClient);
@@ -74,18 +77,27 @@ void callback(char* topic, byte* payload, unsigned int length) {
   String strPayload = String((char*)payload);
   Serial.print("Message arrived [" + strTopic + "] ");
   Serial.println(strPayload);
-
+  
 
   // Switch on the LED if an 1 was received as first character
-  if ( strPayload == "Begin" or strPayload == "Start") {
-    digitalWrite(BUILTIN_LED, LOW);   // Turn the LED on (Note that LOW is the voltage level
-    // but actually the LED is on; this is because
-    // it is active low on the ESP8266)
-    // push message back to broker
-    client.publish("/outTopic", "Successfully started");
-  } 
-  else if ( strPayload == "End" or strPayload == "Stop"){
-    digitalWrite(BUILTIN_LED, HIGH);  // Turn the LED off by making the voltage HIGH
+  int iPos = strTopic.lastIndexOf('/');
+  if( iPos > 0){
+    String devTopic = strTopic.substring(iPos + 1);
+    for (int i = 0; i < 4; i++){
+      if (dev_name[i] == devTopic){
+        if ( strPayload == "Begin" or strPayload == "Start") {
+          digitalWrite(BUILTIN_LED, LOW);   // Turn the LED on (Note that LOW is the voltage level
+      // but actually the LED is on; this is because
+      // it is active low on the ESP8266)
+      // push message back to broker
+          client.publish("/outTopic", "Successfully started");
+        } 
+        else if ( strPayload == "End" or strPayload == "Stop"){
+          digitalWrite(BUILTIN_LED, HIGH);  // Turn the LED off by making the voltage HIGH
+        }
+        break;
+      }
+    }
   }
 
 }
@@ -132,6 +144,8 @@ void setup() {
   setup_wifi();
   client.setServer(mqtt_server, 1883);
   client.setCallback(callback);
+  for (int i = 0; i < 4; i++)
+     Serial.println(dev_name[i]);
 }
 
 void loop() {
