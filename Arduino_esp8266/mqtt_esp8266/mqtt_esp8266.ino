@@ -1,5 +1,4 @@
-/* 
- new strin for git test purpose
+/*
  Basic ESP8266 MQTT example
 
  This sketch demonstrates the capabilities of the pubsub library in combination
@@ -27,6 +26,7 @@
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
 
+#define LED_BUILTIN D4
 // Update these with values suitable for your network.
 
 const char* ssid = "OpenWrt";
@@ -79,7 +79,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
   String strPayload = String((char*)payload);
   Serial.print("Message arrived [" + strTopic + "] ");
   Serial.println(strPayload);
-  
+
 
   // Switch on the LED if an 1 was received as first character
   int iPos = strTopic.lastIndexOf('/');
@@ -144,8 +144,8 @@ void reconnect() {
 }
 
 void setup() {
-  pinMode(BUILTIN_LED, OUTPUT);     // Initialize the BUILTIN_LED pin as an output
-  digitalWrite(BUILTIN_LED, HIGH);
+  pinMode(LED_BUILTIN, OUTPUT);     // Initialize the BUILTIN_LED pin as an output
+  digitalWrite(LED_BUILTIN, HIGH);
   Serial.begin(115200);
   setup_wifi();
   client.setServer(mqtt_server, 1883);
