@@ -11,17 +11,18 @@ Valves are handled by MC through relays. Sensors are connected to MC.
 
 CRON
    OUTPUT
-     - to WATERING send Begin/End for valves(by name ?)
++    - to WATERING send Begin/End for valves(by name ?)
+  	 - to ??? devices monitoring
 
 plugin WATERING
    INPUT
-     - from CRON Begin/End for valves
-	 - from WEB/CLOUD Start/Stop signal for valve/valves(ALLSTOP/ALLSTART)  
++    - from CRON Begin/End for valves
++	 - from WEB/CLOUD Start/Stop signal for valve/valves(ALLSTOP/ALLSTART)  
 	 - from MC
 	      - change status after Begin/End command
 		  - information from sensors
    OUTPUT    
-     - to MC send Begin/End command (Start/Stop command should be analised and if nesessary transformed into Begin/End),
++    - to MC send Begin/End command (Start/Stop command should be analised and if nesessary transformed into Begin/End),
 	    ???  analise information from some kind of sensors like rain starts, pump is on/of, bobber (to open/close valve from main water system);
 	 - record to DB (directly or throughout separate driver)
 	      - change valve's status after recieving from MC;
@@ -29,16 +30,17 @@ plugin WATERING
 
 MC
     INPUT
-	  - from WATERING Begin/End command;
++	  - from WATERING Begin/End command;
 	OUTPUT
 	  - to WATERING:
++	      - switch on status
 	      - change valve's status;
 		  - send information from sensors;
 
 
 WEB server
 	OUTPUT
-	  - to WATERING send Start/Stop for valves(by name ?)
++	  - to WATERING send Start/Stop for valves(by name ?)
 
 CLOUD/MOBILE app
 	OUTPUT
@@ -48,7 +50,7 @@ CLOUD/MOBILE app
 EMERGENCY system
     INPUT
 	  - from NM (netowrk monitoring)
-	  - from sensors (throughout MC)
+	  - from sensors (via MC)
 	OUTPUT
 	  - to Pushover/email throughout Mqttwarn
 
@@ -61,12 +63,12 @@ MWS    main water system;
 
 --------------------------------------------------------------------------------------------------------------
 
-!!!!!    on work now
+!!!!!    done
 
 plugin WATERING
    INPUT
-     - from CRON Begin/End for valves
-	 - from WEB/CLOUD Start/Stop signal for valve/valves(ALLSTOP/ALLSTART)  	 
+done     - from CRON Begin/End to watering and then to mc(valves)
+done for WEB	 - from WEB/CLOUD Start/Stop signal for valve/valves(ALLSTOP/ALLSTART)  	 
 	     if Begin:
 		     update status to <RUNNING>
 			 if ! is_stopped
@@ -94,5 +96,28 @@ plugin WATERING
 
 
    OUTPUT    
-     - to MC send Begin/End command (Start/Stop command should be analised and if nesessary transformed into Begin/End),
-	   analise information from some kind of sensors like rain starts, pump is on/of, bobber (to open/close valve from main water system);
+ done    - to MC send Begin/End command (Start/Stop command should be analised and if nesessary transformed into Begin/End),
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+!!!!!    on work now
+
+MC 
+       - send information from rain sensor (START ALL/ STOP ALL)
+	      there are two(or even three) ways how to use rain sensor:
+		  1. use digital pin on controller + interrupt when value on pin is chenhed;
+		  2. use analog pin and check the value on this pin - if it is lower or higher and previous state of flag is different - send message and change value of flag;
+		  3. use both, send messages from both to plugin. plugin will write this information in DB for farther analysis.
+		  I am about to use 3'th path for test purpose.
+		  
+	   - pressure sensor + relay + pump
+	   - bober + relay + input valve
+
+plugin WATERING
+  INPUT    
+	   - analyze information from some kind of sensors like rain starts, pump is on/of, bobber (to open/close valve from main water system);
+	   
+
+Maybe it woth to consider the situation with one more flag/status(new field in DB) for devices/sensors. as variant "is_blocked". it means 
+individual "is_stopped" status. it is neseccery for example in case when some device need to be stoped for some time for some reason and
+then when it is raining  "StopAll" message is sending. After rain is finished "AllStart"  message will be sent and all devices would be
+unblocked even though we don't want to unblock the device that was stopped manually.

@@ -1,7 +1,7 @@
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
 
-void ICACHE_RAM_ATTR handleInterrupt();   //!!! importent for external interrupt for ESP8266
+void ICACHE_RAM_ATTR handleInterrupt();   //!!! important for external interrupt for ESP8266
 
 IPAddress staticIP(192,168,1,156);
 IPAddress gateway(192,168,1,150);
