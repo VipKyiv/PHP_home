@@ -133,19 +133,22 @@ void handleInterrupt() {
 void setup() {
  
   Serial.begin(115200);
-  setup_wifi();
+  WiFi.softAPdisconnect(true);
+/*  setup_wifi();
 
-  MQTTclient.setServer(mqtt_server, 1883);
-  MQTTclient.setCallback(callback);
+//  MQTTclient.setServer(mqtt_server, 1883);
+//  MQTTclient.setCallback(callback); */
 
   pinMode(interruptPin, INPUT_PULLUP);
   pinMode(rainPin, INPUT);
   attachInterrupt(digitalPinToInterrupt(interruptPin), handleInterrupt, CHANGE);
+  Serial.println("started ... ");
 }
- 
+
+
 void loop() {
 // MQTT client connect
-  if (!MQTTclient.connected()) {
+ /* if (!MQTTclient.connected()) {
     Serial.println("reconnect");
     reconnect();
   }
@@ -161,7 +164,7 @@ void loop() {
     Serial.print("Publish message: ");
     Serial.println(msg);
     MQTTclient.publish("/outTopic", msg);
-  }
+  }*/
 // end check if MQTT is still alive
 
 // check if rain is started/stopped
@@ -174,7 +177,7 @@ void loop() {
 //    if sensorValue >= thresholdValue  it is Dry
     if ((sensorValue < thresholdValue && !isRain) || (sensorValue >= thresholdValue && isRain)){
       isRain = !isRain;
-      isRain ? MQTTclient.publish(outTopic, "StopAll") : MQTTclient.publish(outTopic, "StartAll");
+ //     isRain ? MQTTclient.publish(outTopic, "StopAll") : MQTTclient.publish(outTopic, "StartAll");
       Serial.println("the change of rain status detected ");
     }
   }
