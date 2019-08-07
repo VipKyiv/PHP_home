@@ -9,6 +9,7 @@ boolean isRain = false;
 volatile boolean checkBobberInterrupt = false;
 volatile boolean checkRainInterrupt = false;
 uint16_t analogPinValue = 0;
+int prevBobberStatus = -1;
 
 unsigned long debounceTime = 1000;
 unsigned long lastBobberDebounce = 0;
@@ -46,10 +47,15 @@ void loop(){
     checkBobberInterrupt = false;
  //     isRain ? MQTTclient.publish(outTopic, "StopAll") : MQTTclient.publish(outTopic, "StartAll");
     Serial.println("the change of pump status detected ");
-    if(!digitalRead(pinBobberSensor))       // if there is zero value on a pin
-      Serial.println("Start the pump"); 
-    else
-      Serial.println("Stop the pump"); 
+    int currBobberStatus = digitalRead(pinBobberSensor);
+    if (currBobberStatus != prevBobberStatus){
+      prevBobberStatus = currBobberStatus;
+      if(!currBobberStatus)       // if there is zero value on a pin
+        Serial.println("Start the pump"); 
+      else
+        Serial.println("Stop the pump"); 
+//      Serial.println("the bobber status was really detected ");
+    }
   }
 /*  else
     checkInterrupt = false; */
