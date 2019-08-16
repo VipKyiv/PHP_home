@@ -15,9 +15,11 @@ const char* mqtt_server = "192.168.1.150";
 const char* mqtt_user = "test";
 const char* mqtt_pass = "duster07";
 const char* mqtt_client = "ESP8266_Solar";
-const char* outTopic = "/watering";    // ????????
-const char* inTopic = "/weather";        // 
-String dev_name[] = {"weather_sensor", "rain_sensor"};
+const char* outTopic_info = "/info/response";    // send info response
+const char* outTopic_error = "/info/response/error";    // send error info response
+const char* outTopic_alarm = "/watering";    // send StopAll/StartAll if it is(not) raining 
+const char* inTopic = mqtt_client;        // 
+String weather_message[] = {"temperature", "humility", "pressure", "weather"};
 
 WiFiClient espClient;
 PubSubClient MQTTclient(espClient);
@@ -52,9 +54,9 @@ void setup_wifi() {
   Serial.print("Connecting to ");
   Serial.println(ssid);
 
-  WiFi.mode(WIFI_STA);
-  WiFi.begin(ssid, password);
+//  WiFi.mode(WIFI_STA);
   WiFi.config(staticIP, gateway, subnet);
+  WiFi.begin(ssid, password);
 
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
@@ -69,33 +71,49 @@ void setup_wifi() {
   Serial.println(WiFi.localIP());
 }
 
-void callback(char* topic, byte* payload, unsigned int length) {
+void callback(char* intopic, byte* payload, unsigned int length) {
 
-  String strTopic = String(topic);
+  String strTopic = String(intopic);
   payload[length] = '\0';
   String strPayload = String((char*)payload);
   Serial.print("Message arrived [" + strTopic + "] ");
   Serial.println(strPayload);
 
-  // Switch on the LED if an 1 was received as first character
   int iPos = strTopic.lastIndexOf('/');
   if( iPos > 0){
-    String devTopic = strTopic.substring(iPos + 1);
-    for (int i = 0; i < 4; i++){
-      if (dev_name[i] == devTopic){
-        if ( strPayload == "Begin" or strPayload == "Start") {
-          digitalWrite(BUILTIN_LED, LOW);   // Turn the LED on (Note that LOW is the voltage level
-      // but actually the LED is on; this is because
-      // it is active low on the ESP8266)
+    String destination = strTopic.substring(iPos + 1);
+    int iNum = 0;
+    for (int i = 0; i < 3; i++){
+      if ( strPayload == weather_message[i] or strPayload == weather_message[3]) {
+        int lenTopic = strlen(outTopic_info) + weather_message[i].length() + destination.length() + 3;
+        char topic[lenTopic];
+        snprintf(topic, lenTopic, "%s/%s/%s", outTopic_info, weather_message[i].c_str(), destination.c_str());
+        float value;
+        int lenMsg = 6;
+        if (i == 0) 
+          value = bme.readTemperature();
+        else if (i == 1)  
+          value = bme.readHumidity();
+        else {
+          value = bme.readPressure();  
+          lenMsg = 9;
+        }  
       // push message back to broker
-          MQTTclient.publish("/outTopic", "Successfully started");
-        } 
-        else if ( strPayload == "End" or strPayload == "Stop"){
-          digitalWrite(BUILTIN_LED, HIGH);  // Turn the LED off by making the voltage HIGH
-        }
-        break;
+        snprintf (msg, lenMsg, "%f", value);
+        MQTTclient.publish(topic, msg);
+        iNum++; 
       }
     }
+    if (!iNum) {
+      // send push message about wrong request
+      snprintf (msg, 50, "Wrong request %s", payload);
+      MQTTclient.publish(outTopic_error, msg);     
+    }
+  }
+  else {
+    // send push message about wrong topic format
+    snprintf (msg, 50, "Wrong topic format %s", intopic);
+    MQTTclient.publish(outTopic_error, msg);
   }
 }
 
@@ -108,9 +126,9 @@ void reconnect() {
       Serial.println("connected");
       // Once connected, publish an announcement...
       if (isFirstTime){
-        int lenTopic = strlen(outTopic) + strlen(mqtt_client) + 2;
+        int lenTopic = strlen(outTopic_alarm) + strlen(mqtt_client) + 2;
         char topic[lenTopic];
-        snprintf(topic, lenTopic, "%s/%s", outTopic, mqtt_client);
+        snprintf(topic, lenTopic, "%s/%s", outTopic_alarm, mqtt_client);
         MQTTclient.publish(topic, "switched_on");
         isFirstTime = false;        
         Serial.print("First start MC ");
@@ -118,9 +136,9 @@ void reconnect() {
         Serial.println(" switched_on");
       }
       // ... and resubscribe
-      int lenTopic = strlen(inTopic) + strlen(mqtt_client) + 4;
+      int lenTopic = strlen(inTopic) + 4;
       char topic[lenTopic];
-      snprintf(topic, lenTopic, "%s/%s/+", inTopic, mqtt_client);
+      snprintf(topic, lenTopic, "/%s/#", inTopic);
       Serial.print("inTopic = ");
       Serial.println(topic);
       MQTTclient.subscribe(topic);
@@ -145,7 +163,9 @@ void setup()
 {
   Serial.begin(115200);
   setup_wifi();
-
+  MQTTclient.setServer(mqtt_server, 1883);
+  MQTTclient.setCallback(callback);
+  
   pinMode(interruptPin, INPUT_PULLUP);
   pinMode(rainPin, INPUT);
   attachInterrupt(digitalPinToInterrupt(interruptPin), handleInterrupt, CHANGE);
@@ -198,7 +218,7 @@ void loop()
 // end check if rain is started/stopped
 
 // read sensor
-  pressureValue = bme.readPressure() / 133.32239F;
+/*  pressureValue = bme.readPressure() / 133.32239F;
   termoValue = bme.readTemperature();
   humidityValue = bme.readHumidity();
 
@@ -213,5 +233,5 @@ void loop()
   Serial.println("---------------------------");
 
   // check every 30 seconds
-  delay(30000);
+  delay(30000);*/
 }
