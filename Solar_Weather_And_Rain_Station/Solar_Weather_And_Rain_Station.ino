@@ -95,7 +95,7 @@ void callback(char* intopic, byte* payload, unsigned int length) {
         else if (i == 1)  
           value = bme.readHumidity();
         else {
-          value = bme.readPressure();  
+          value = bme.readPressure() / 100.0F;  
           lenMsg = 9;
         }  
       // push message back to broker
