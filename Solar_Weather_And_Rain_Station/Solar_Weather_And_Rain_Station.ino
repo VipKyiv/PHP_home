@@ -117,7 +117,7 @@ void callback(char* intopic, byte* payload, unsigned int length) {
   }
 }
 
-void reconnect() {
+void connectMQTT() {
   // Loop until we're reconnected
   while (!MQTTclient.connected()) {
     Serial.print("Attempting MQTT connection...");
@@ -165,6 +165,7 @@ void setup()
   setup_wifi();
   MQTTclient.setServer(mqtt_server, 1883);
   MQTTclient.setCallback(callback);
+  connectMQTT();
   
   pinMode(interruptPin, INPUT_PULLUP);
   pinMode(rainPin, INPUT);
@@ -173,6 +174,7 @@ void setup()
   if (!bme.begin(BME280_ADDRESS))
   {
     Serial.println(F("\nCould not find a valid BME280 sensor, check wiring!"));
+    MQTTclient.publish(outTopic_error, "Could not find a valid BME280 sensor");
   }
   Serial.println("started ... ");
 }
@@ -181,8 +183,8 @@ void loop()
 {
 // MQTT client connect
   if (!MQTTclient.connected()) {
-    Serial.println("reconnect");
-    reconnect();
+    Serial.println("reconnect MQTT");
+    connectMQTT();
   }
   MQTTclient.loop();
 // end MQTT client connect

@@ -27,8 +27,12 @@
 #include <PubSubClient.h>
 
 #define LED_BUILTIN D4
-// Update these with values suitable for your network.
 
+IPAddress staticIP(192,168,1,158);
+IPAddress gateway(192,168,1,150);
+IPAddress subnet(255,255,255,0);
+
+// Update these with values suitable for your network.
 const char* ssid = "OpenWrt";
 const char* password = "charade23450";
 const char* mqtt_server = "192.168.1.150";
@@ -43,7 +47,7 @@ String dev_name[] = {"valve_1", "valve_2", "valve_3", "valve_4"};
 
 
 WiFiClient espClient;
-PubSubClient client(espClient);
+PubSubClient MQTTclient(espClient);
 long lastMsg = 0;
 char msg[50];
 int value = 0;
@@ -57,6 +61,7 @@ void setup_wifi() {
   Serial.print("Connecting to ");
   Serial.println(ssid);
 
+  WiFi.config(staticIP, gateway, subnet);
   WiFi.begin(ssid, password);
 
   while (WiFi.status() != WL_CONNECTED) {
@@ -92,7 +97,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
       // but actually the LED is on; this is because
       // it is active low on the ESP8266)
       // push message back to broker
-          client.publish("/outTopic", "Successfully started");
+          MQTTclient.publish("/outTopic", "Successfully started");
         } 
         else if ( strPayload == "End" or strPayload == "Stop"){
           digitalWrite(BUILTIN_LED, HIGH);  // Turn the LED off by making the voltage HIGH
@@ -104,23 +109,23 @@ void callback(char* topic, byte* payload, unsigned int length) {
 
 }
 
-void reconnect() {
+void connectMQTT() {
   // Loop until we're reconnected
-  while (!client.connected()) {
+  while (!MQTTclient.connected()) {
     Serial.print("Attempting MQTT connection...");
     // Create a random client ID
 //    String clientId = "ESP8266Client-";
 //    clientId += String(random(0xffff), HEX);
     // Attempt to connect
 //    if (client.connect(clientId.c_str())) {
-    if (client.connect(mqtt_client, mqtt_user, mqtt_pass)) {
+    if (MQTTclient.connect(mqtt_client, mqtt_user, mqtt_pass)) {
       Serial.println("connected");
       // Once connected, publish an announcement...
       if (isFirstTime){
         int lenTopic = strlen(outTopic) + strlen(mqtt_client) + 2;
         char topic[lenTopic];
         snprintf(topic, lenTopic, "%s/%s", outTopic, mqtt_client);
-        client.publish(topic, "switched_on");
+        MQTTclient.publish(topic, "switched_on");
         isFirstTime = false;        
         Serial.print("First start MC ");
         Serial.print(topic);
@@ -130,12 +135,12 @@ void reconnect() {
       int lenTopic = strlen(inTopic) + strlen(mqtt_client) + 4;
       char topic[lenTopic];
       snprintf(topic, lenTopic, "%s/%s/+", inTopic, mqtt_client);
-      client.subscribe(topic);
-      client.subscribe("/debug");
+      MQTTclient.subscribe(topic);
+      MQTTclient.subscribe("/debug");
     } 
     else {
       Serial.print("failed, rc=");
-      Serial.print(client.state());
+      Serial.print(MQTTclient.state());
       Serial.println(" try again in 5 seconds");
       // Wait 5 seconds before retrying
       delay(5000);
@@ -148,17 +153,17 @@ void setup() {
   digitalWrite(LED_BUILTIN, HIGH);
   Serial.begin(115200);
   setup_wifi();
-  client.setServer(mqtt_server, 1883);
-  client.setCallback(callback);
+  MQTTclient.setServer(mqtt_server, 1883);
+  MQTTclient.setCallback(callback);
 }
 
 void loop() {
 
-  if (!client.connected()) {
+  if (!MQTTclient.connected()) {
     Serial.println("reconnect");
-    reconnect();
+    connectMQTT();
   }
-  client.loop();
+  MQTTclient.loop();
 
   long now = millis();
   if (now - lastMsg > 900000) {
@@ -167,6 +172,6 @@ void loop() {
     snprintf (msg, 50, "%s. I am still alive #%ld", mqtt_client, value);
     Serial.print("Publish message: ");
     Serial.println(msg);
-    client.publish("/outTopic", msg);
+    MQTTclient.publish("/outTopic", msg);
   }
 }
