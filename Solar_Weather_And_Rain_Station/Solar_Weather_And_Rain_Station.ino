@@ -95,7 +95,7 @@ void callback(char* intopic, byte* payload, unsigned int length) {
         else if (i == 1)  
           value = bme.readHumidity();
         else {
-          value = bme.readPressure() / 100.0F;  
+          value = bme.readPressure() / 133.32239F; 
           lenMsg = 9;
         }  
       // push message back to broker
@@ -211,7 +211,7 @@ void loop()
 //    if sensorValue >= thresholdValue  it is Dry
     if ((sensorValue < thresholdValue && !isRain) || (sensorValue >= thresholdValue && isRain)){
       isRain = !isRain;
- //     isRain ? MQTTclient.publish(outTopic, "StopAll") : MQTTclient.publish(outTopic, "StartAll");
+      isRain ? MQTTclient.publish(outTopic, "RainStart") : MQTTclient.publish(outTopic, "RainStop");
       Serial.println("the change of rain status detected ");
     }
   }
@@ -219,21 +219,4 @@ void loop()
     checkInterrupt = false;
 // end check if rain is started/stopped
 
-// read sensor
-/*  pressureValue = bme.readPressure() / 133.32239F;
-  termoValue = bme.readTemperature();
-  humidityValue = bme.readHumidity();
-
-  // send to serial port, comment after debug
-  Serial.println("---------------------------");
-  Serial.print("Termo: ");
-  Serial.println(termoValue);
-  Serial.print("Humidity: ");
-  Serial.println(humidityValue);
-  Serial.print("Pressure: ");
-  Serial.println(pressureValue);
-  Serial.println("---------------------------");
-
-  // check every 30 seconds
-  delay(30000);*/
 }
