@@ -18,6 +18,7 @@ const char* mqtt_client = "ESP8266_Solar";
 const char* outTopic_info = "/info/response";    // send info response
 const char* outTopic_error = "/info/response/error";    // send error info response
 const char* outTopic_alarm = "/watering";    // send StopAll/StartAll if it is(not) raining 
+const char* outTopic = "/watering";    // send StopAll/StartAll if it is(not) raining 
 const char* inTopic = mqtt_client;        // 
 String weather_message[] = {"temperature", "humility", "pressure", "weather"};
 
@@ -162,6 +163,7 @@ void handleInterrupt() {
 void setup()
 {
   Serial.begin(115200);
+  Serial.println("started ... ");
   setup_wifi();
   MQTTclient.setServer(mqtt_server, 1883);
   MQTTclient.setCallback(callback);
@@ -176,7 +178,7 @@ void setup()
     Serial.println(F("\nCould not find a valid BME280 sensor, check wiring!"));
     MQTTclient.publish(outTopic_error, "Could not find a valid BME280 sensor");
   }
-  Serial.println("started ... ");
+
 }
 
 void loop()

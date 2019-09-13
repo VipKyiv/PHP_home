@@ -121,3 +121,7 @@ Maybe it woth to consider the situation with one more flag/status(new field in D
 individual "is_stopped" status. it is neseccery for example in case when some device need to be stoped for some time for some reason and
 then when it is raining  "StopAll" message is sending. After rain is finished "AllStart"  message will be sent and all devices would be
 unblocked even though we don't want to unblock the device that was stopped manually.
+
+
+??? for future
+ --- ? what if a sensor is not plugged or broken ?
