@@ -22,7 +22,7 @@ const char* outTopic = "/watering";    // send StopAll/StartAll if it is(not) ra
 const char* inTopic = mqtt_client;        // 
 String weather_message[] = {"temperature", "humility", "pressure", "weather"};
 
-WiFiClient espClient;
+WiFiClient espClient; 
 PubSubClient MQTTclient(espClient);
 
 unsigned long lastMsg = 0;
