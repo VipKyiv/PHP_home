@@ -74,8 +74,9 @@ void createWebServer() {
     content = "<!DOCTYPE HTML>\r\n<html>Hello from ESP8266 at ";
     content += ipStr;
     content += "<p>";
-    content += "</p><form method='get' action='setting'><label>SSID:&nbsp;</label><input name='ssid' length=32>";
-    content += "<BR><label>Password:&nbsp;</label><input name='pass' length=16>";
+    content += "</p><form method='get' action='setting'><label>SSID:&nbsp;</label><input name='ssid' length=32 value='";
+    content += wifiSsid;
+    content += "'><BR><label>Password:&nbsp;</label><input name='pass' length=16>";
     content += "<BR><label>MQTT&nbsp;broker&nbsp;IP:&nbsp;</label><input name='mqttip' length=15><P><input type='submit'></form>";
     content += "</html>";
     server.send(200, "text/html", content);
@@ -125,7 +126,8 @@ void createWebServer() {
       delay(1000);
       WiFi.disconnect();
       ESP.restart();
-    } else {
+    } 
+    else {
       content = "{\"Error\":\"404 not found\"}";
       statusCode = 404;
       Serial.println("Sending 404");
@@ -204,7 +206,7 @@ void startWebServer() {
     FlagConfigure = 1;
 //    WiFi.mode(WIFI_STA);
 //    WiFi.disconnect();
-    printlnDebug("Create AP to configure wifi parameters, SSID=");
+    printDebug("Create AP to configure wifi parameters, SSID=");
     printlnDebug(mqttClientName);
     WiFi.mode(WIFI_AP);
     WiFi.softAP(mqttClientName, WIFI_CONFIGURE_PASS);
@@ -217,8 +219,34 @@ void setup() {
 
 //  connectWiFi();
 //  initMC();
-    generateMqttName();
-    startWebServer();
+  EEPROM.begin(512);
+  printDebug("Signature in EEPROM: ");
+  printlnDebug(EEPROM.read(0));
+// Check if we have stored configuration data
+  if (EEPROM.read(0) != 0xA5) {
+    // No parameters in EEPROM, start configuration mode
+    printlnDebug("No parameters in EEPROM, start configuration mode");
+  }
+  else {
+    printlnDebug("EEPROM has been already configured");
+//    signatureConf = true;
+    for (int i = 0; i < sizeof(wifiSsid); i++)
+      wifiSsid[i] = EEPROM.read(i + 1);
+    for (int i = 0; i < sizeof(wifiPass); i++)
+      wifiPass[i] = EEPROM.read(i + sizeof(wifiSsid) + 1);
+    for (int i = 0; i < sizeof(mqttServer); i++)
+      mqttServer[i] = EEPROM.read(i + sizeof(wifiSsid) + sizeof(wifiPass) + 1);
+    printlnDebug("Found WIFI parameters in EEPROM: ");
+    printDebug(wifiSsid);
+    printDebug(" ");
+    printDebug(wifiPass);
+    printDebug(" ");
+    printlnDebug(mqttServer);
+  }
+  generateMqttName();
+  startWebServer();
+    //signatureConf = false;
+    //setupWifi(true);
   
   pinMode(LED, OUTPUT);     // Initialize the LED_BUILTIN pin as an output
 }
@@ -233,5 +261,5 @@ void loop() {
   digitalWrite(LED, HIGH);  // Turn the LED off by making the voltage HIGH
   delay(3000);                      // Wait for two seconds (to demonstrate the active low LED)
 //  printlnDebug("HIGH");
-//  server.handleClient();
+  server.handleClient();
 }
