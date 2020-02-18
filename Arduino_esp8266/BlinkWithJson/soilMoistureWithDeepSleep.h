@@ -21,6 +21,12 @@
 // Call ESP.restart() after timeout in configure mode
 #define RESTART_AFTER_CONFIGURE
 
+// Set the number of WIFI connection attempts
+#define WIFI_CONNECT_ATTEMPTS 20
+
+// Set the number of MQTT connection attempts
+#define MQTT_CONNECT_ATTEMPTS 5
+
 // Simple thermostat control (conflicts with MOVEMENT_CONTROL and SONOFF_CONTROL!), thermostat.cpp
 // #define THERMOSTAT_CONTROL
 
@@ -41,14 +47,14 @@
 #define WIFI_CONFIGURE_PASS "passtest"
 
 // MQTT username and password
-#define MQTT_USER_NAME "testuser"
-#define MQTT_PASSWORD "testtest"
+#define MQTT_USER_NAME "test"
+#define MQTT_PASSWORD "duster07"
 #define MQTT_PORT 1883
 
 // MQTT Prefixes
 #define MQTT_PREFIX "/myhome/ESPX-"
 #define MQTT_NAME "espx-"
-#define MQTT_PNP_PREFIX "/myhome/PNP"
+#define MQTT_PNP_PREFIX "/info/mcStarted"
 
 // OTA firmware upload password
 #define OTA_UPLOAD_PASS "Bi38s2iw"
@@ -69,7 +75,7 @@
 //#define TOPIC_TEMPERATURE "TEMPERATURE"
 //#define TOPIC_HUMIDITY "HUMIDITY"
 
-extern WiFiClient wifi;
-extern PubSubClient myClient;
+//extern WiFiClient wifi;
+//extern PubSubClient mqttClient(wifi);
 
 #endif

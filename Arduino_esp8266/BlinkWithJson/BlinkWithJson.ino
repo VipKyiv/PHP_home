@@ -251,6 +251,7 @@ bool connectMQTT() {
     StaticJsonDocument<256> doc;
     doc["name"] = mqttClientName;
     doc["ip"] = IPAddress2String(localIP);
+    doc["description"] = mcDescription;
     serializeJson(doc, Serial);
     char json_string[256];
     serializeJson(doc, json_string);
