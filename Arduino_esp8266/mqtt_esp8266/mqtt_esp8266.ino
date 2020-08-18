@@ -136,7 +136,7 @@ void connectMQTT() {
       char topic[lenTopic];
       snprintf(topic, lenTopic, "%s/%s/+", inTopic, mqtt_client);
       MQTTclient.subscribe(topic);
-      MQTTclient.subscribe("/debug");
+//      MQTTclient.subscribe("/debug");
     } 
     else {
       Serial.print("failed, rc=");

@@ -134,15 +134,15 @@ void setup() {
  
   Serial.begin(115200);
   WiFi.softAPdisconnect(true);
-/*  setup_wifi();
-
+  setup_wifi();
+/*
 //  MQTTclient.setServer(mqtt_server, 1883);
 //  MQTTclient.setCallback(callback); */
 
   pinMode(interruptPin, INPUT_PULLUP);
   pinMode(rainPin, INPUT);
   attachInterrupt(digitalPinToInterrupt(interruptPin), handleInterrupt, CHANGE);
-  Serial.println("started ... ");
+  Serial.println("\nstarted ... ");
 }
 
 
@@ -166,6 +166,11 @@ void loop() {
     MQTTclient.publish("/outTopic", msg);
   }*/
 // end check if MQTT is still alive
+
+  int rainSensorValue = analogRead(rainPin);
+  Serial.print("Rain ");
+  Serial.println(rainSensorValue);
+  delay(1000);
 
 // check if rain is started/stopped
   if(checkInterrupt == true && ( (millis() - lastDebounce)  > debounceTime )){
