@@ -88,7 +88,7 @@ extern char infoTopic[];
 // Configure web server
 extern ESP8266WebServer server;
 
-extern WiFiClient espClient;
+//extern WiFiClient espClient;
 extern PubSubClient mqttClient;
 
 
@@ -98,7 +98,6 @@ void startWebServer();
 bool connectWiFi();
 bool connectMQTT();
 bool initMC();
-void startWebServer();
 void readParamFromEEPROM();
 int sendMqttMessages(char* ,char* , char* );
 int sendMqttMessages(char* ,int , char* );
